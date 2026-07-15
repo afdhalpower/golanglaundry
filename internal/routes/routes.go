@@ -27,11 +27,14 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	customerRepo := repositories.NewCustomerRepository(db)
 	serviceRepo := repositories.NewServiceRepository(db)
 
+	orderRepo := repositories.NewOrderRepository(db)
+
 	// Initialize services
 	authService := services.NewAuthService(userRepo)
 	dashboardService := services.NewDashboardService(dashboardRepo)
 	customerService := services.NewCustomerService(customerRepo)
 	serviceService := services.NewServiceService(serviceRepo)
+	orderService := services.NewOrderService(orderRepo, customerRepo, serviceRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
@@ -39,6 +42,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	profileHandler := handlers.NewProfileHandler(authService, userRepo)
 	customerHandler := handlers.NewCustomerHandler(customerService)
 	serviceHandler := handlers.NewServiceHandler(serviceService)
+	orderHandler := handlers.NewOrderHandler(orderService, customerService, serviceService)
 
 	// Health check
 	app.Get("/health", func(c fiber.Ctx) error {
@@ -81,6 +85,15 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	services.Get("/:id/edit", serviceHandler.Edit)
 	services.Post("/:id", serviceHandler.Update)
 	services.Post("/:id/delete", serviceHandler.Delete)
+
+	// Orders
+	orders := protected.Group("/orders")
+	orders.Get("/", orderHandler.Index)
+	orders.Get("/new", orderHandler.New)
+	orders.Post("/", orderHandler.Create)
+	orders.Get("/:id", orderHandler.Show)
+	orders.Post("/:id/status", orderHandler.UpdateStatus)
+	orders.Post("/:id/delete", orderHandler.Delete)
 
 	slog.Info("routes registered successfully")
 }
