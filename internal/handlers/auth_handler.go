@@ -8,29 +8,24 @@ import (
 )
 
 type AuthHandler struct {
-	authService  *services.AuthService
-	sessionStore *session.Store
+	authService *services.AuthService
 }
 
-func NewAuthHandler(authService *services.AuthService, sessionStore *session.Store) *AuthHandler {
+func NewAuthHandler(authService *services.AuthService) *AuthHandler {
 	return &AuthHandler{
-		authService:  authService,
-		sessionStore: sessionStore,
+		authService: authService,
 	}
 }
 
 func (h *AuthHandler) LoginPage(c fiber.Ctx) error {
-	sess, err := h.sessionStore.Get(c)
-	if err == nil {
-		if sess.Get("user_id") != nil {
-			return c.Redirect().To("/dashboard")
-		}
+	m := session.FromContext(c)
+	if m != nil && m.Get("user_id") != nil {
+		return c.Redirect().To("/dashboard")
 	}
 
 	return c.Render("auth/login", fiber.Map{
-		"title":      "Login",
-		"hideLayout": true,
-	}, "layouts/main")
+		"title": "Login",
+	})
 }
 
 func (h *AuthHandler) Login(c fiber.Ctx) error {
@@ -57,8 +52,8 @@ func (h *AuthHandler) Login(c fiber.Ctx) error {
 		}, "layouts/main")
 	}
 
-	sess, err := h.sessionStore.Get(c)
-	if err != nil {
+	m := session.FromContext(c)
+	if m == nil {
 		return c.Render("auth/login", fiber.Map{
 			"title":      "Login",
 			"hideLayout": true,
@@ -66,26 +61,18 @@ func (h *AuthHandler) Login(c fiber.Ctx) error {
 		}, "layouts/main")
 	}
 
-	sess.Set("user_id", user.ID)
-	sess.Set("user_name", user.Name)
-	sess.Set("user_role", user.Role)
-	sess.Set("user_email", user.Email)
-
-	if err := sess.Save(); err != nil {
-		return c.Render("auth/login", fiber.Map{
-			"title":      "Login",
-			"hideLayout": true,
-			"error":      "Gagal menyimpan session",
-		}, "layouts/main")
-	}
+	m.Set("user_id", user.ID)
+	m.Set("user_name", user.Name)
+	m.Set("user_role", user.Role)
+	m.Set("user_email", user.Email)
 
 	return c.Redirect().To("/dashboard")
 }
 
 func (h *AuthHandler) Logout(c fiber.Ctx) error {
-	sess, err := h.sessionStore.Get(c)
-	if err == nil {
-		sess.Destroy()
+	m := session.FromContext(c)
+	if m != nil {
+		m.Destroy()
 	}
 	return c.Redirect().To("/auth/login")
 }
