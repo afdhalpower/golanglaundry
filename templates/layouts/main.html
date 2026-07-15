@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{if .title}}{{.title}} - {{end}}Laundry Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+    {{if .hideLayout}}
+        {{embed}}
+    {{else if eq .title "Login"}}
+        <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+            {{embed}}
+        </div>
+    {{else}}
+        {{template "partials/navbar" .}}
+        <div class="flex">
+            {{template "partials/sidebar" .}}
+            <main class="flex-1 p-6 ml-64 mt-16">
+                {{template "partials/alerts" .}}
+                {{embed}}
+            </main>
+        </div>
+    {{end}}
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
