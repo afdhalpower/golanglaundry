@@ -1,0 +1,60 @@
+<div class="max-w-2xl mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+        <a href="/payments" class="text-slate-400 hover:text-slate-600 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Detail Pembayaran</h1>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Order</p>
+                <p class="text-sm font-mono font-medium text-slate-900 mt-1">{{if .payment.Order}}{{.payment.Order.OrderNumber}}{{else}}-{{end}}</p>
+            </div>
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Pelanggan</p>
+                <p class="text-sm font-medium text-slate-900 mt-1">{{if .payment.Order.Customer}}{{.payment.Order.Customer.Name}}{{else}}-{{end}}</p>
+            </div>
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Jumlah</p>
+                <p class="text-lg font-bold text-indigo-600 mt-1">Rp {{printf "%.0f" .payment.Amount}}</p>
+            </div>
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Metode</p>
+                <p class="text-sm font-medium text-slate-900 mt-1">
+                    {{if eq .payment.Method "tunai"}}Tunai
+                    {{else if eq .payment.Method "qris"}}QRIS
+                    {{else if eq .payment.Method "transfer"}}Transfer
+                    {{end}}
+                </p>
+            </div>
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Status</p>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium 
+                    {{if eq .payment.Status "lunas"}}bg-emerald-50 text-emerald-700
+                    {{else}}bg-amber-50 text-amber-700{{end}} mt-1">
+                    {{if eq .payment.Status "lunas"}}Lunas{{else}}Belum Lunas{{end}}
+                </span>
+            </div>
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Tanggal Bayar</p>
+                <p class="text-sm text-slate-900 mt-1">{{.payment.PaymentDate.Format "02 Jan 2006 15:04"}}</p>
+            </div>
+        </div>
+
+        {{if .payment.Note}}
+        <div>
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Catatan</p>
+            <p class="text-sm text-slate-600 mt-1">{{.payment.Note}}</p>
+        </div>
+        {{end}}
+
+        <div class="flex items-center gap-3 pt-2">
+            <a href="/orders/{{.payment.OrderID}}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Lihat Order</a>
+            <a href="/payments" class="text-sm text-slate-500 hover:text-slate-700">Kembali</a>
+        </div>
+    </div>
+</div>
