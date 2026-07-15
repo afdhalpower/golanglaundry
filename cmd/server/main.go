@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/session"
+	"github.com/gofiber/storage/postgres/v3"
 	"github.com/gofiber/template/html/v2"
 
 	"github.com/afdhalpower/golanglaundry/internal/config"
@@ -49,6 +51,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Run seeder
+	if err := config.RunSeeder(db); err != nil {
+		slog.Error("failed to run seeder", "error", err)
+		os.Exit(1)
+	}
+
 	// Setup HTML template engine
 	engine := html.New("./templates", ".html")
 	engine.AddFuncMap(routes.TemplateFunctions())
@@ -62,8 +70,23 @@ func main() {
 		Views:        engine,
 	})
 
-	// Setup routes
-	routes.SetupRoutes(app)
+	// Session middleware (must be early in chain)
+	sessionMiddleware := session.New(session.Config{
+		Storage: postgres.New(postgres.Config{
+			ConnectionURI: cfg.Database.DSN(),
+			Table:         "sessions",
+			Reset:         false,
+			GCInterval:    10 * time.Minute,
+		}),
+		CookieHTTPOnly:  true,
+		CookieSecure:    cfg.App.Environment == "production",
+		CookieSameSite:  "Lax",
+		AbsoluteTimeout: 24 * time.Hour,
+	})
+	app.Use(sessionMiddleware)
+
+	// Setup routes with dependencies
+	routes.SetupRoutes(app, db)
 
 	// Graceful shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
