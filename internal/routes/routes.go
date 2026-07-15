@@ -90,5 +90,18 @@ func TemplateFunctions() template.FuncMap {
 			}
 			return s[i:j]
 		},
+		"upper": func(s string) string {
+			if len(s) == 0 {
+				return ""
+			}
+			return string(s[0]-32) + s[1:]
+		},
+		"loop": func(count int) []int {
+			var items []int
+			for i := 0; i < count; i++ {
+				items = append(items, i)
+			}
+			return items
+		},
 	}
 }

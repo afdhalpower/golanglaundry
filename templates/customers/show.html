@@ -1,0 +1,57 @@
+<div class="max-w-2xl mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+        <a href="/customers" class="text-slate-400 hover:text-slate-600 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Detail Pelanggan</h1>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-indigo-100 rounded-full flex items-center justify-center text-lg font-bold text-indigo-600 flex-shrink-0">
+                    {{slice .customer.Name 0 1 | upper}}
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">{{.customer.Name}}</h2>
+                    <p class="text-sm text-slate-500">Bergabung sejak {{.customer.CreatedAt.Format "02 Jan 2006"}}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Nomor HP</p>
+                    <p class="text-sm text-slate-900 mt-1">{{if .customer.Phone}}{{.customer.Phone}}{{else}}<span class="text-slate-300">-</span>{{end}}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">WhatsApp</p>
+                    <p class="text-sm text-slate-900 mt-1">
+                        {{if .customer.Whatsapp}}
+                        <a href="https://wa.me/{{.customer.Whatsapp}}" target="_blank" class="text-emerald-600 hover:text-emerald-700 font-medium">+{{.customer.Whatsapp}}</a>
+                        {{else}}<span class="text-slate-300">-</span>{{end}}
+                    </p>
+                </div>
+                <div class="md:col-span-2">
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Alamat</p>
+                    <p class="text-sm text-slate-900 mt-1">{{if .customer.Address}}{{.customer.Address}}{{else}}<span class="text-slate-300">-</span>{{end}}</p>
+                </div>
+                <div class="md:col-span-2">
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Catatan</p>
+                    <p class="text-sm text-slate-900 mt-1">{{if .customer.Notes}}{{.customer.Notes}}{{else}}<span class="text-slate-300">-</span>{{end}}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center gap-3">
+            <a href="/customers/{{.customer.ID}}/edit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Edit</a>
+            <form action="/customers/{{.customer.ID}}/delete" method="POST" class="inline" onsubmit="return confirm('Hapus pelanggan {{.customer.Name}}?')">
+                <button type="submit" class="bg-white border border-red-300 text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-sm font-medium transition">Hapus</button>
+            </form>
+            <a href="/customers" class="text-sm text-slate-500 hover:text-slate-700 ml-auto transition">Kembali</a>
+        </div>
+    </div>
+</div>

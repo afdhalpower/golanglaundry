@@ -1,0 +1,31 @@
+{{if gt .totalPages 1}}
+<div class="flex items-center justify-between mt-4">
+    <p class="text-sm text-slate-500">
+        Menampilkan halaman {{.page}} dari {{.totalPages}} ({{.total}} total)
+    </p>
+    <div class="flex items-center gap-1">
+        {{if gt .page 1}}
+        <a href="?page={{sub .page 1}}{{if .search}}&search={{.search}}{{end}}" class="px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100 transition">
+            Prev
+        </a>
+        {{end}}
+
+        {{$currentPage := .page}}
+        {{$totalPages := .totalPages}}
+        {{range $i := loop $totalPages}}
+            {{$pageNum := add $i 1}}
+            {{if eq $pageNum $currentPage}}
+            <span class="px-3 py-2 rounded-lg text-sm font-medium bg-indigo-600 text-white">{{$pageNum}}</span>
+            {{else}}
+            <a href="?page={{$pageNum}}{{if $.search}}&search={{$.search}}{{end}}" class="px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100 transition">{{$pageNum}}</a>
+            {{end}}
+        {{end}}
+
+        {{if lt .page .totalPages}}
+        <a href="?page={{add .page 1}}{{if .search}}&search={{.search}}{{end}}" class="px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100 transition">
+            Next
+        </a>
+        {{end}}
+    </div>
+</div>
+{{end}}
