@@ -34,7 +34,7 @@ func (h *InventoryHandler) Index(c fiber.Ctx) error {
 
 	lowStock, _ := h.service.GetLowStock()
 
-	return c.Render("inventory/index", fiber.Map{
+	return render(c, "inventory/index", fiber.Map{
 		"title":      "Inventaris",
 		"items":      items,
 		"search":     search,
@@ -47,7 +47,7 @@ func (h *InventoryHandler) Index(c fiber.Ctx) error {
 }
 
 func (h *InventoryHandler) New(c fiber.Ctx) error {
-	return c.Render("inventory/form", fiber.Map{
+	return render(c, "inventory/form", fiber.Map{
 		"title": "Tambah Barang",
 		"item":  nil,
 	}, "layouts/main")
@@ -67,7 +67,7 @@ func (h *InventoryHandler) Create(c fiber.Ctx) error {
 	}
 
 	if err := h.service.Create(item); err != nil {
-		return c.Render("inventory/form", fiber.Map{
+		return render(c, "inventory/form", fiber.Map{
 			"title": "Tambah Barang",
 			"item":  item,
 			"error": "Gagal menyimpan barang",
@@ -84,7 +84,7 @@ func (h *InventoryHandler) Edit(c fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).SendString("Barang tidak ditemukan")
 	}
 
-	return c.Render("inventory/form", fiber.Map{
+	return render(c, "inventory/form", fiber.Map{
 		"title": "Edit Barang",
 		"item":  item,
 	}, "layouts/main")
@@ -108,7 +108,7 @@ func (h *InventoryHandler) Update(c fiber.Ctx) error {
 	item.Description = c.FormValue("description")
 
 	if err := h.service.Update(item); err != nil {
-		return c.Render("inventory/form", fiber.Map{
+		return render(c, "inventory/form", fiber.Map{
 			"title": "Edit Barang",
 			"item":  item,
 			"error": "Gagal memperbarui barang",

@@ -46,7 +46,7 @@ func (h *OrderHandler) Index(c fiber.Ctx) error {
 	statuses := h.orderService.GetStatusList()
 	counts, _ := h.orderService.GetStatusCounts()
 
-	return c.Render("orders/index", fiber.Map{
+	return render(c, "orders/index", fiber.Map{
 		"title":      "Pesanan",
 		"orders":     orders,
 		"status":     status,
@@ -71,7 +71,7 @@ func (h *OrderHandler) New(c fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).SendString("Gagal memuat data layanan")
 	}
 
-	return c.Render("orders/form", fiber.Map{
+	return render(c, "orders/form", fiber.Map{
 		"title":     "Tambah Pesanan",
 		"order":     nil,
 		"customers": customers,
@@ -99,7 +99,7 @@ func (h *OrderHandler) Create(c fiber.Ctx) error {
 	if err != nil {
 		customers, _, _ := h.customerService.GetAll(1, 1000, "")
 		services, _ := h.serviceService.GetActive()
-		return c.Render("orders/form", fiber.Map{
+		return render(c, "orders/form", fiber.Map{
 			"title":     "Tambah Pesanan",
 			"customers": customers,
 			"services":  services,
@@ -119,7 +119,7 @@ func (h *OrderHandler) Show(c fiber.Ctx) error {
 
 	validNext := h.orderService.GetValidNextStatuses(order.Status)
 
-	return c.Render("orders/show", fiber.Map{
+	return render(c, "orders/show", fiber.Map{
 		"title":     "Detail Pesanan",
 		"order":     order,
 		"validNext": validNext,
@@ -139,7 +139,7 @@ func (h *OrderHandler) UpdateStatus(c fiber.Ctx) error {
 
 	if err := h.orderService.UpdateStatus(uint(id), newStatus, note, userID); err != nil {
 		validNext := h.orderService.GetValidNextStatuses(order.Status)
-		return c.Render("orders/show", fiber.Map{
+		return render(c, "orders/show", fiber.Map{
 			"title":     "Detail Pesanan",
 			"order":     order,
 			"validNext": validNext,

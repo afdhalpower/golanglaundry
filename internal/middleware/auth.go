@@ -5,24 +5,22 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/session"
 )
 
-var Store *session.Store
-
 func AuthRequired() fiber.Handler {
 	return func(c fiber.Ctx) error {
-		sess, err := Store.Get(c)
-		if err != nil {
+		m := session.FromContext(c)
+		if m == nil {
 			return c.Redirect().To("/auth/login")
 		}
 
-		userID := sess.Get("user_id")
+		userID := m.Get("user_id")
 		if userID == nil {
 			return c.Redirect().To("/auth/login")
 		}
 
 		c.Locals("user_id", userID)
-		c.Locals("user_name", sess.Get("user_name"))
-		c.Locals("user_role", sess.Get("user_role"))
-		c.Locals("user_email", sess.Get("user_email"))
+		c.Locals("user_name", m.Get("user_name"))
+		c.Locals("user_role", m.Get("user_role"))
+		c.Locals("user_email", m.Get("user_email"))
 
 		return c.Next()
 	}

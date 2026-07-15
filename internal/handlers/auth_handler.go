@@ -23,7 +23,7 @@ func (h *AuthHandler) LoginPage(c fiber.Ctx) error {
 		return c.Redirect().To("/dashboard")
 	}
 
-	return c.Render("auth/login", fiber.Map{
+	return render(c, "auth/login", fiber.Map{
 		"title": "Login",
 	})
 }
@@ -33,7 +33,7 @@ func (h *AuthHandler) Login(c fiber.Ctx) error {
 	password := c.FormValue("password")
 
 	if email == "" || password == "" {
-		return c.Render("auth/login", fiber.Map{
+		return render(c, "auth/login", fiber.Map{
 			"title":      "Login",
 			"hideLayout": true,
 			"error":      "Email dan password wajib diisi",
@@ -45,7 +45,7 @@ func (h *AuthHandler) Login(c fiber.Ctx) error {
 		Password: password,
 	})
 	if err != nil {
-		return c.Render("auth/login", fiber.Map{
+		return render(c, "auth/login", fiber.Map{
 			"title":      "Login",
 			"hideLayout": true,
 			"error":      err.Error(),
@@ -54,7 +54,7 @@ func (h *AuthHandler) Login(c fiber.Ctx) error {
 
 	m := session.FromContext(c)
 	if m == nil {
-		return c.Render("auth/login", fiber.Map{
+		return render(c, "auth/login", fiber.Map{
 			"title":      "Login",
 			"hideLayout": true,
 			"error":      "Gagal memulai session",

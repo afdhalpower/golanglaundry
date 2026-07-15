@@ -32,7 +32,7 @@ func (h *CustomerHandler) Index(c fiber.Ctx) error {
 		totalPages++
 	}
 
-	return c.Render("customers/index", fiber.Map{
+	return render(c, "customers/index", fiber.Map{
 		"title":      "Pelanggan",
 		"customers":  customers,
 		"search":     search,
@@ -44,7 +44,7 @@ func (h *CustomerHandler) Index(c fiber.Ctx) error {
 }
 
 func (h *CustomerHandler) New(c fiber.Ctx) error {
-	return c.Render("customers/form", fiber.Map{
+	return render(c, "customers/form", fiber.Map{
 		"title":    "Tambah Pelanggan",
 		"customer": nil,
 	}, "layouts/main")
@@ -60,7 +60,7 @@ func (h *CustomerHandler) Create(c fiber.Ctx) error {
 	}
 
 	if errs := validation.ValidateStruct(customer); errs != nil {
-		return c.Render("customers/form", fiber.Map{
+		return render(c, "customers/form", fiber.Map{
 			"title":    "Tambah Pelanggan",
 			"customer": customer,
 			"errors":   errs.ToMap(),
@@ -68,7 +68,7 @@ func (h *CustomerHandler) Create(c fiber.Ctx) error {
 	}
 
 	if err := h.service.Create(customer); err != nil {
-		return c.Render("customers/form", fiber.Map{
+		return render(c, "customers/form", fiber.Map{
 			"title":    "Tambah Pelanggan",
 			"customer": customer,
 			"error":    "Gagal menyimpan pelanggan",
@@ -85,7 +85,7 @@ func (h *CustomerHandler) Show(c fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).SendString("Pelanggan tidak ditemukan")
 	}
 
-	return c.Render("customers/show", fiber.Map{
+	return render(c, "customers/show", fiber.Map{
 		"title":    "Detail Pelanggan",
 		"customer": customer,
 	}, "layouts/main")
@@ -98,7 +98,7 @@ func (h *CustomerHandler) Edit(c fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).SendString("Pelanggan tidak ditemukan")
 	}
 
-	return c.Render("customers/form", fiber.Map{
+	return render(c, "customers/form", fiber.Map{
 		"title":    "Edit Pelanggan",
 		"customer": customer,
 	}, "layouts/main")
@@ -118,7 +118,7 @@ func (h *CustomerHandler) Update(c fiber.Ctx) error {
 	customer.Notes = c.FormValue("notes")
 
 	if errs := validation.ValidateStruct(customer); errs != nil {
-		return c.Render("customers/form", fiber.Map{
+		return render(c, "customers/form", fiber.Map{
 			"title":    "Edit Pelanggan",
 			"customer": customer,
 			"errors":   errs.ToMap(),
@@ -126,7 +126,7 @@ func (h *CustomerHandler) Update(c fiber.Ctx) error {
 	}
 
 	if err := h.service.Update(customer); err != nil {
-		return c.Render("customers/form", fiber.Map{
+		return render(c, "customers/form", fiber.Map{
 			"title":    "Edit Pelanggan",
 			"customer": customer,
 			"error":    "Gagal memperbarui pelanggan",

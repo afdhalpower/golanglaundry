@@ -32,7 +32,7 @@ func (h *ServiceHandler) Index(c fiber.Ctx) error {
 		totalPages++
 	}
 
-	return c.Render("services/index", fiber.Map{
+	return render(c, "services/index", fiber.Map{
 		"title":      "Layanan",
 		"services":   services,
 		"search":     search,
@@ -44,7 +44,7 @@ func (h *ServiceHandler) Index(c fiber.Ctx) error {
 }
 
 func (h *ServiceHandler) New(c fiber.Ctx) error {
-	return c.Render("services/form", fiber.Map{
+	return render(c, "services/form", fiber.Map{
 		"title":   "Tambah Layanan",
 		"service": nil,
 	}, "layouts/main")
@@ -67,7 +67,7 @@ func (h *ServiceHandler) Create(c fiber.Ctx) error {
 	}
 
 	if errs := validation.ValidateStruct(service); errs != nil {
-		return c.Render("services/form", fiber.Map{
+		return render(c, "services/form", fiber.Map{
 			"title":   "Tambah Layanan",
 			"service": service,
 			"errors":  errs.ToMap(),
@@ -75,7 +75,7 @@ func (h *ServiceHandler) Create(c fiber.Ctx) error {
 	}
 
 	if err := h.service.Create(service); err != nil {
-		return c.Render("services/form", fiber.Map{
+		return render(c, "services/form", fiber.Map{
 			"title":   "Tambah Layanan",
 			"service": service,
 			"error":   "Gagal menyimpan layanan",
@@ -92,7 +92,7 @@ func (h *ServiceHandler) Edit(c fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).SendString("Layanan tidak ditemukan")
 	}
 
-	return c.Render("services/form", fiber.Map{
+	return render(c, "services/form", fiber.Map{
 		"title":   "Edit Layanan",
 		"service": service,
 	}, "layouts/main")
@@ -119,7 +119,7 @@ func (h *ServiceHandler) Update(c fiber.Ctx) error {
 	service.IsActive = c.FormValue("is_active") == "on"
 
 	if errs := validation.ValidateStruct(service); errs != nil {
-		return c.Render("services/form", fiber.Map{
+		return render(c, "services/form", fiber.Map{
 			"title":   "Edit Layanan",
 			"service": service,
 			"errors":  errs.ToMap(),
@@ -127,7 +127,7 @@ func (h *ServiceHandler) Update(c fiber.Ctx) error {
 	}
 
 	if err := h.service.Update(service); err != nil {
-		return c.Render("services/form", fiber.Map{
+		return render(c, "services/form", fiber.Map{
 			"title":   "Edit Layanan",
 			"service": service,
 			"error":   "Gagal memperbarui layanan",

@@ -15,7 +15,7 @@ func NewSettingHandler(service *services.SettingService) *SettingHandler {
 
 func (h *SettingHandler) Index(c fiber.Ctx) error {
 	settings, _ := h.service.GetAll()
-	return c.Render("settings/index", fiber.Map{
+	return render(c, "settings/index", fiber.Map{
 		"title":    "Pengaturan",
 		"settings": settings,
 	}, "layouts/main")
@@ -31,7 +31,7 @@ func (h *SettingHandler) Update(c fiber.Ctx) error {
 	}
 
 	if err := h.service.Update(settings); err != nil {
-		return c.Render("settings/index", fiber.Map{
+		return render(c, "settings/index", fiber.Map{
 			"title": "Pengaturan",
 			"error": "Gagal menyimpan pengaturan",
 		}, "layouts/main")

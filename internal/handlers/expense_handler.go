@@ -40,7 +40,7 @@ func (h *ExpenseHandler) Index(c fiber.Ctx) error {
 		totalPages++
 	}
 
-	return c.Render("expenses/index", fiber.Map{
+	return render(c, "expenses/index", fiber.Map{
 		"title":      "Pengeluaran",
 		"expenses":   expenses,
 		"categories": categories,
@@ -54,7 +54,7 @@ func (h *ExpenseHandler) Index(c fiber.Ctx) error {
 
 func (h *ExpenseHandler) New(c fiber.Ctx) error {
 	categories, _ := h.categoryService.GetAll()
-	return c.Render("expenses/form", fiber.Map{
+	return render(c, "expenses/form", fiber.Map{
 		"title":      "Tambah Pengeluaran",
 		"expense":    nil,
 		"categories": categories,
@@ -81,7 +81,7 @@ func (h *ExpenseHandler) Create(c fiber.Ctx) error {
 
 	if err := h.expenseService.Create(expense); err != nil {
 		categories, _ := h.categoryService.GetAll()
-		return c.Render("expenses/form", fiber.Map{
+		return render(c, "expenses/form", fiber.Map{
 			"title":      "Tambah Pengeluaran",
 			"expense":    expense,
 			"categories": categories,
@@ -100,7 +100,7 @@ func (h *ExpenseHandler) Edit(c fiber.Ctx) error {
 	}
 
 	categories, _ := h.categoryService.GetAll()
-	return c.Render("expenses/form", fiber.Map{
+	return render(c, "expenses/form", fiber.Map{
 		"title":      "Edit Pengeluaran",
 		"expense":    expense,
 		"categories": categories,
@@ -130,7 +130,7 @@ func (h *ExpenseHandler) Update(c fiber.Ctx) error {
 
 	if err := h.expenseService.Update(expense); err != nil {
 		categories, _ := h.categoryService.GetAll()
-		return c.Render("expenses/form", fiber.Map{
+		return render(c, "expenses/form", fiber.Map{
 			"title":      "Edit Pengeluaran",
 			"expense":    expense,
 			"categories": categories,

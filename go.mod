@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/gofiber/fiber/v3 v3.4.0
+	github.com/gofiber/storage/postgres/v3 v3.6.0
 	github.com/gofiber/template/html/v2 v2.1.3
 	github.com/spf13/viper v1.21.0
 	golang.org/x/crypto v0.54.0
@@ -20,7 +21,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/gofiber/schema v1.8.0 // indirect
-	github.com/gofiber/storage/postgres/v3 v3.6.0 // indirect
 	github.com/gofiber/template v1.8.3 // indirect
 	github.com/gofiber/utils v1.1.0 // indirect
 	github.com/gofiber/utils/v2 v2.1.1 // indirect

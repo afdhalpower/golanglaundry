@@ -32,7 +32,7 @@ func (h *PaymentHandler) Index(c fiber.Ctx) error {
 		totalPages++
 	}
 
-	return c.Render("payments/index", fiber.Map{
+	return render(c, "payments/index", fiber.Map{
 		"title":      "Pembayaran",
 		"payments":   payments,
 		"status":     status,
@@ -68,7 +68,7 @@ func (h *PaymentHandler) Show(c fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).SendString("Pembayaran tidak ditemukan")
 	}
 
-	return c.Render("payments/show", fiber.Map{
+	return render(c, "payments/show", fiber.Map{
 		"title":   "Detail Pembayaran",
 		"payment": payment,
 	}, "layouts/main")

@@ -20,7 +20,7 @@ func (h *DashboardHandler) Index(c fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).SendString("Gagal memuat dashboard")
 	}
 
-	return c.Render("dashboard/index", fiber.Map{
+	return render(c, "dashboard/index", fiber.Map{
 		"title": "Dashboard",
 		"stats": stats,
 	}, "layouts/main")

@@ -32,7 +32,7 @@ func (h *UserHandler) Index(c fiber.Ctx) error {
 
 	roles := h.service.GetRoles()
 
-	return c.Render("users/index", fiber.Map{
+	return render(c, "users/index", fiber.Map{
 		"title":      "Manajemen User",
 		"users":      users,
 		"page":       page,
@@ -45,7 +45,7 @@ func (h *UserHandler) Index(c fiber.Ctx) error {
 
 func (h *UserHandler) New(c fiber.Ctx) error {
 	roles := h.service.GetRoles()
-	return c.Render("users/form", fiber.Map{
+	return render(c, "users/form", fiber.Map{
 		"title": "Tambah User",
 		"user":  nil,
 		"roles": roles,
@@ -61,7 +61,7 @@ func (h *UserHandler) Create(c fiber.Ctx) error {
 	)
 	if err != nil {
 		roles := h.service.GetRoles()
-		return c.Render("users/form", fiber.Map{
+		return render(c, "users/form", fiber.Map{
 			"title": "Tambah User",
 			"error": err.Error(),
 			"roles": roles,
@@ -79,7 +79,7 @@ func (h *UserHandler) Edit(c fiber.Ctx) error {
 	}
 
 	roles := h.service.GetRoles()
-	return c.Render("users/form", fiber.Map{
+	return render(c, "users/form", fiber.Map{
 		"title": "Edit User",
 		"user":  user,
 		"roles": roles,
@@ -93,7 +93,7 @@ func (h *UserHandler) Update(c fiber.Ctx) error {
 	if err := h.service.Update(uint(id), c.FormValue("name"), c.FormValue("email"), c.FormValue("role"), isActive); err != nil {
 		user, _ := h.service.GetByID(uint(id))
 		roles := h.service.GetRoles()
-		return c.Render("users/form", fiber.Map{
+		return render(c, "users/form", fiber.Map{
 			"title": "Edit User",
 			"user":  user,
 			"roles": roles,

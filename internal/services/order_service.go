@@ -189,3 +189,7 @@ func (s *OrderService) GetStatusList() []string {
 func (s *OrderService) GetValidNextStatuses(currentStatus string) []string {
 	return validTransitions[currentStatus]
 }
+
+func (s *OrderService) GetStatusCounts() (map[string]int64, error) {
+	return s.orderRepo.GetStatusCounts()
+}

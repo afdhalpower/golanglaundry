@@ -67,7 +67,7 @@ func (h *ReportHandler) Index(c fiber.Ctx) error {
 	topCustomers, _ := h.service.GetTopCustomers()
 	topServices, _ := h.service.GetTopServices()
 
-	return c.Render("reports/index", fiber.Map{
+	return render(c, "reports/index", fiber.Map{
 		"title":        "Laporan",
 		"startDate":    start.Format("2006-01-02"),
 		"endDate":      end.Format("2006-01-02"),
