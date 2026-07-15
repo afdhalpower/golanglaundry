@@ -29,6 +29,10 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	serviceRepo := repositories.NewServiceRepository(db)
 
 	orderRepo := repositories.NewOrderRepository(db)
+	paymentRepo := repositories.NewPaymentRepository(db)
+	expenseCategoryRepo := repositories.NewExpenseCategoryRepository(db)
+	expenseRepo := repositories.NewExpenseRepository(db)
+	inventoryRepo := repositories.NewInventoryRepository(db)
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo)
@@ -36,6 +40,10 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	customerService := services.NewCustomerService(customerRepo)
 	serviceService := services.NewServiceService(serviceRepo)
 	orderService := services.NewOrderService(orderRepo, customerRepo, serviceRepo)
+	paymentService := services.NewPaymentService(paymentRepo, orderRepo)
+	expenseCategoryService := services.NewExpenseCategoryService(expenseCategoryRepo)
+	expenseService := services.NewExpenseService(expenseRepo)
+	inventoryService := services.NewInventoryService(inventoryRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
@@ -44,6 +52,9 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	customerHandler := handlers.NewCustomerHandler(customerService)
 	serviceHandler := handlers.NewServiceHandler(serviceService)
 	orderHandler := handlers.NewOrderHandler(orderService, customerService, serviceService)
+	paymentHandler := handlers.NewPaymentHandler(paymentService)
+	expenseHandler := handlers.NewExpenseHandler(expenseService, expenseCategoryService)
+	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
 
 	// Health check
 	app.Get("/health", func(c fiber.Ctx) error {
@@ -95,6 +106,30 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	orders.Get("/:id", orderHandler.Show)
 	orders.Post("/:id/status", orderHandler.UpdateStatus)
 	orders.Post("/:id/delete", orderHandler.Delete)
+
+	// Payments
+	payments := protected.Group("/payments")
+	payments.Get("/", paymentHandler.Index)
+	payments.Post("/", paymentHandler.Create)
+	payments.Get("/:id", paymentHandler.Show)
+
+	// Expenses
+	expenses := protected.Group("/expenses")
+	expenses.Get("/", expenseHandler.Index)
+	expenses.Get("/new", expenseHandler.New)
+	expenses.Post("/", expenseHandler.Create)
+	expenses.Get("/:id/edit", expenseHandler.Edit)
+	expenses.Post("/:id", expenseHandler.Update)
+	expenses.Post("/:id/delete", expenseHandler.Delete)
+
+	// Inventory
+	inventory := protected.Group("/inventory")
+	inventory.Get("/", inventoryHandler.Index)
+	inventory.Get("/new", inventoryHandler.New)
+	inventory.Post("/", inventoryHandler.Create)
+	inventory.Get("/:id/edit", inventoryHandler.Edit)
+	inventory.Post("/:id", inventoryHandler.Update)
+	inventory.Post("/:id/delete", inventoryHandler.Delete)
 
 	slog.Info("routes registered successfully")
 }
