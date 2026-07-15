@@ -1,0 +1,23 @@
+# Binary
+/golanglaundry
+/tmp/
+
+# Environment
+.env
+config.local.yaml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Air
+tmp/
+
+# Dependency
+vendor/
