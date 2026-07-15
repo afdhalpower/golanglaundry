@@ -24,15 +24,21 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	// Initialize repositories
 	userRepo := repositories.NewUserRepository(db)
 	dashboardRepo := repositories.NewDashboardRepository(db)
+	customerRepo := repositories.NewCustomerRepository(db)
+	//serviceRepo := repositories.NewServiceRepository(db)
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo)
 	dashboardService := services.NewDashboardService(dashboardRepo)
+	customerService := services.NewCustomerService(customerRepo)
+	//serviceService := services.NewServiceService(serviceRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
 	profileHandler := handlers.NewProfileHandler(authService, userRepo)
+	customerHandler := handlers.NewCustomerHandler(customerService)
+	//serviceHandler := handlers.NewServiceHandler(serviceService)
 
 	// Health check
 	app.Get("/health", func(c fiber.Ctx) error {
@@ -56,6 +62,16 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	protected.Get("/profile", profileHandler.Index)
 	protected.Post("/profile", profileHandler.Update)
 	protected.Post("/profile/password", profileHandler.ChangePassword)
+
+	// Customers
+	customers := protected.Group("/customers")
+	customers.Get("/", customerHandler.Index)
+	customers.Get("/new", customerHandler.New)
+	customers.Post("/", customerHandler.Create)
+	customers.Get("/:id", customerHandler.Show)
+	customers.Get("/:id/edit", customerHandler.Edit)
+	customers.Post("/:id", customerHandler.Update)
+	customers.Post("/:id/delete", customerHandler.Delete)
 
 	slog.Info("routes registered successfully")
 }
