@@ -1,0 +1,41 @@
+package middleware
+
+import (
+	"log/slog"
+	"time"
+
+	"github.com/gofiber/fiber/v3"
+)
+
+func Logger() fiber.Handler {
+	return func(c fiber.Ctx) error {
+		start := time.Now()
+
+		err := c.Next()
+
+		duration := time.Since(start)
+		slog.Info("request",
+			"method", c.Method(),
+			"path", c.Path(),
+			"status", c.Response().StatusCode(),
+			"duration", duration.String(),
+			"ip", c.IP(),
+		)
+
+		return err
+	}
+}
+
+func AuthRequired() fiber.Handler {
+	return func(c fiber.Ctx) error {
+		// TODO: Implement session-based auth check in Phase 2
+		return c.Next()
+	}
+}
+
+func RolePermission(roles ...string) fiber.Handler {
+	return func(c fiber.Ctx) error {
+		// TODO: Implement role check in Phase 2
+		return c.Next()
+	}
+}
