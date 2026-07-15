@@ -33,7 +33,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	expenseCategoryRepo := repositories.NewExpenseCategoryRepository(db)
 	expenseRepo := repositories.NewExpenseRepository(db)
 	inventoryRepo := repositories.NewInventoryRepository(db)
-
+	settingRepo := repositories.NewSettingRepository(db)
 	reportRepo := repositories.NewReportRepository(db)
 
 	// Initialize services
@@ -46,6 +46,8 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	expenseCategoryService := services.NewExpenseCategoryService(expenseCategoryRepo)
 	expenseService := services.NewExpenseService(expenseRepo)
 	inventoryService := services.NewInventoryService(inventoryRepo)
+	userService := services.NewUserService(userRepo)
+	settingService := services.NewSettingService(settingRepo)
 	reportService := services.NewReportService(reportRepo)
 
 	// Initialize handlers
@@ -58,6 +60,8 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
 	expenseHandler := handlers.NewExpenseHandler(expenseService, expenseCategoryService)
 	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
+	userHandler := handlers.NewUserHandler(userService)
+	settingHandler := handlers.NewSettingHandler(settingService)
 	reportHandler := handlers.NewReportHandler(reportService)
 
 	// Health check
@@ -139,6 +143,20 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	reports := protected.Group("/reports")
 	reports.Get("/", reportHandler.Index)
 	reports.Get("/export/:type", reportHandler.ExportCSV)
+
+	// Users
+	users := protected.Group("/users")
+	users.Get("/", userHandler.Index)
+	users.Get("/new", userHandler.New)
+	users.Post("/", userHandler.Create)
+	users.Get("/:id/edit", userHandler.Edit)
+	users.Post("/:id", userHandler.Update)
+	users.Post("/:id/reset-password", userHandler.ResetPassword)
+	users.Post("/:id/delete", userHandler.Delete)
+
+	// Settings
+	protected.Get("/settings", settingHandler.Index)
+	protected.Post("/settings", settingHandler.Update)
 
 	slog.Info("routes registered successfully")
 }

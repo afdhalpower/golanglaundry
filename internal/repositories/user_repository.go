@@ -51,6 +51,10 @@ func (r *UserRepository) Create(user *models.User) error {
 	return r.db.Create(user).Error
 }
 
+func (r *UserRepository) Update(user *models.User) error {
+	return r.db.Save(user).Error
+}
+
 func (r *UserRepository) Delete(id uint) error {
 	return r.db.Delete(&models.User{}, id).Error
 }
