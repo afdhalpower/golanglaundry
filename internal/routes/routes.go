@@ -3,6 +3,7 @@ package routes
 import (
 	"html/template"
 	"log/slog"
+	"time"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/static"
@@ -124,6 +125,9 @@ func TemplateFunctions() template.FuncMap {
 				items = append(items, i)
 			}
 			return items
+		},
+		"nowDate": func() string {
+			return time.Now().Format("2006-01-02")
 		},
 	}
 }

@@ -1,0 +1,201 @@
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Back + Title -->
+    <div class="flex items-center gap-3">
+        <a href="/orders" class="text-slate-400 hover:text-slate-600 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </a>
+        <div class="flex-1">
+            <h1 class="text-2xl font-bold text-slate-900">Detail Pesanan</h1>
+            <p class="text-sm text-slate-500 mt-1 font-mono">{{.order.OrderNumber}}</p>
+        </div>
+        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium
+            {{if eq .order.Status "menunggu"}}bg-slate-100 text-slate-700
+            {{else if eq .order.Status "dicuci"}}bg-blue-50 text-blue-700
+            {{else if eq .order.Status "dikeringkan"}}bg-amber-50 text-amber-700
+            {{else if eq .order.Status "disetrika"}}bg-purple-50 text-purple-700
+            {{else if eq .order.Status "siap_diambil"}}bg-indigo-50 text-indigo-700
+            {{else if eq .order.Status "sudah_diambil"}}bg-emerald-50 text-emerald-700
+            {{else if eq .order.Status "dibatalkan"}}bg-red-50 text-red-700
+            {{end}}">
+            <span class="w-2 h-2 rounded-full
+                {{if eq .order.Status "menunggu"}}bg-slate-500
+                {{else if eq .order.Status "dicuci"}}bg-blue-500
+                {{else if eq .order.Status "dikeringkan"}}bg-amber-500
+                {{else if eq .order.Status "disetrika"}}bg-purple-500
+                {{else if eq .order.Status "siap_diambil"}}bg-indigo-500
+                {{else if eq .order.Status "sudah_diambil"}}bg-emerald-500
+                {{else if eq .order.Status "dibatalkan"}}bg-red-500
+                {{end}}"></span>
+            {{if eq .order.Status "menunggu"}}Menunggu
+            {{else if eq .order.Status "dicuci"}}Dicuci
+            {{else if eq .order.Status "dikeringkan"}}Dikeringkan
+            {{else if eq .order.Status "disetrika"}}Disetrika
+            {{else if eq .order.Status "siap_diambil"}}Siap Diambil
+            {{else if eq .order.Status "sudah_diambil"}}Sudah Diambil
+            {{else if eq .order.Status "dibatalkan"}}Dibatalkan
+            {{end}}
+        </span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left: Order Info -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Order Info Card -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-slate-900 mb-4">Informasi Pesanan</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Pelanggan</p>
+                        <p class="text-sm font-medium text-slate-900 mt-1">{{if .order.Customer}}{{.order.Customer.Name}}{{else}}-{{end}}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Tanggal Masuk</p>
+                        <p class="text-sm text-slate-900 mt-1">{{.order.EntryDate.Format "02 Jan 2006"}}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Estimasi Selesai</p>
+                        <p class="text-sm text-slate-900 mt-1">{{.order.EstimatedDoneDate.Format "02 Jan 2006 15:04"}}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Kasir</p>
+                        <p class="text-sm text-slate-900 mt-1">{{if .order.User}}{{.order.User.Name}}{{else}}-{{end}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services Card -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-slate-900 mb-4">Layanan</h3>
+                <div class="space-y-3">
+                    {{range .order.Details}}
+                    <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-slate-900">{{if .Service}}{{.Service.Name}}{{else}}Layanan #{{.ServiceID}}{{end}}</p>
+                                <p class="text-xs text-slate-400">{{$.order.WeightKg}} kg × Rp {{printf "%.0f" .PricePerKg}}/kg</p>
+                            </div>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-900">Rp {{printf "%.0f" (mul $.order.WeightKg .PricePerKg)}}</p>
+                    </div>
+                    {{end}}
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-200 space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500">Subtotal</span>
+                        <span class="font-medium text-slate-900">Rp {{printf "%.0f" (mul .order.WeightKg (index .order.Details 0).PricePerKg)}}</span>
+                    </div>
+                    {{if gt .order.Discount 0.0}}
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500">Diskon</span>
+                        <span class="font-medium text-red-600">-Rp {{printf "%.0f" .order.Discount}}</span>
+                    </div>
+                    {{end}}
+                    {{if gt .order.ExtraCost 0.0}}
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500">Biaya Tambahan</span>
+                        <span class="font-medium text-amber-600">+Rp {{printf "%.0f" .order.ExtraCost}}</span>
+                    </div>
+                    {{end}}
+                    <div class="flex justify-between text-base pt-2 border-t border-slate-200">
+                        <span class="font-semibold text-slate-900">Total</span>
+                        <span class="font-bold text-lg text-indigo-600">Rp {{printf "%.0f" .order.Total}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            {{if .order.Notes}}
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-slate-900 mb-2">Catatan</h3>
+                <p class="text-sm text-slate-600">{{.order.Notes}}</p>
+            </div>
+            {{end}}
+        </div>
+
+        <!-- Right: Tracking Timeline + Actions -->
+        <div class="space-y-6">
+            <!-- Update Status -->
+            {{if gt (len .validNext) 0}}
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-slate-900 mb-4">Update Status</h3>
+                <form action="/orders/{{.order.ID}}/status" method="POST" class="space-y-3">
+                    <select name="status" required
+                        class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="">Pilih status...</option>
+                        {{range .validNext}}
+                        <option value="{{.}}">
+                            {{if eq . "dicuci"}}Dicuci
+                            {{else if eq . "dikeringkan"}}Dikeringkan
+                            {{else if eq . "disetrika"}}Disetrika
+                            {{else if eq . "siap_diambil"}}Siap Diambil
+                            {{else if eq . "sudah_diambil"}}Sudah Diambil
+                            {{else if eq . "dibatalkan"}}Dibatalkan
+                            {{else}}{{.}}
+                            {{end}}
+                        </option>
+                        {{end}}
+                    </select>
+                    <input type="text" name="note" placeholder="Catatan (opsional)"
+                        class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium transition">
+                        Update Status
+                    </button>
+                </form>
+            </div>
+            {{end}}
+
+            <!-- Tracking Timeline -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-slate-900 mb-4">Riwayat Status</h3>
+                <div class="space-y-0">
+                    {{range $i, $t := .order.Tracking}}
+                    <div class="flex gap-3 pb-4 relative">
+                        {{if lt $i (sub (len $.order.Tracking) 1)}}
+                        <div class="absolute left-[11px] top-5 bottom-0 w-0.5 bg-slate-200"></div>
+                        {{end}}
+                        <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center
+                            {{if eq $t.Status "sudah_diambil"}}bg-emerald-100 text-emerald-600
+                            {{else if eq $t.Status "dibatalkan"}}bg-red-100 text-red-600
+                            {{else}}bg-slate-100 text-slate-500{{end}}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                {{if eq $t.Status "sudah_diambil"}}<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                {{else}}<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>{{end}}
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-slate-900">
+                                {{if eq $t.Status "menunggu"}}Menunggu
+                                {{else if eq $t.Status "dicuci"}}Dicuci
+                                {{else if eq $t.Status "dikeringkan"}}Dikeringkan
+                                {{else if eq $t.Status "disetrika"}}Disetrika
+                                {{else if eq $t.Status "siap_diambil"}}Siap Diambil
+                                {{else if eq $t.Status "sudah_diambil"}}Sudah Diambil
+                                {{else if eq $t.Status "dibatalkan"}}Dibatalkan
+                                {{else}}{{$t.Status}}{{end}}
+                            </p>
+                            <p class="text-xs text-slate-400">{{$t.CreatedAt.Format "02 Jan 15:04"}}</p>
+                            {{if $t.Note}}<p class="text-xs text-slate-500 mt-0.5">{{$t.Note}}</p>{{end}}
+                        </div>
+                    </div>
+                    {{else}}
+                    <p class="text-sm text-slate-400 text-center py-4">Belum ada riwayat</p>
+                    {{end}}
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="bg-white rounded-xl border border-red-200 p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-red-700 mb-4">Hapus Pesanan</h3>
+                <form action="/orders/{{.order.ID}}/delete" method="POST" onsubmit="return confirm('Hapus pesanan {{.order.OrderNumber}}?')">
+                    <button type="submit" class="w-full bg-white border border-red-300 text-red-600 hover:bg-red-50 py-2 rounded-lg text-sm font-medium transition">
+                        Hapus Pesanan
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

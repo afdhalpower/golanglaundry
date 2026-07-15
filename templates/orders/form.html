@@ -1,0 +1,119 @@
+<div class="max-w-3xl mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+        <a href="/orders" class="text-slate-400 hover:text-slate-600 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">{{.title}}</h1>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <form action="/orders" method="POST" class="space-y-5">
+            <!-- Customer -->
+            <div>
+                <label for="customer_id" class="block text-sm font-medium text-slate-700 mb-1">Pelanggan <span class="text-red-500">*</span></label>
+                <select id="customer_id" name="customer_id" required
+                    class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm">
+                    <option value="">Pilih pelanggan...</option>
+                    {{range .customers}}
+                    <option value="{{.ID}}">{{.Name}} {{if .Phone}}- {{.Phone}}{{end}}</option>
+                    {{end}}
+                </select>
+                <p class="text-xs text-slate-400 mt-1"><a href="/customers/new" class="text-indigo-600 hover:text-indigo-700">Tambah pelanggan baru</a></p>
+            </div>
+
+            <!-- Service -->
+            <div>
+                <label for="service_id" class="block text-sm font-medium text-slate-700 mb-1">Layanan <span class="text-red-500">*</span></label>
+                <select id="service_id" name="service_id" required
+                    class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm"
+                    x-data x-on:change="
+                        const price = $event.target.options[$event.target.selectedIndex].dataset.price;
+                        const kg = document.getElementById('weight_kg').value || 0;
+                        document.getElementById('price_display').textContent = 'Rp ' + (price * kg).toLocaleString('id-ID');
+                        document.getElementById('price_per_kg_display').textContent = 'Rp ' + Number(price).toLocaleString('id-ID') + '/kg';
+                    ">
+                    <option value="">Pilih layanan...</option>
+                    {{range .services}}
+                    <option value="{{.ID}}" data-price="{{.PricePerKg}}">{{.Name}} - Rp {{printf "%.0f" .PricePerKg}}/kg ({{.EstimatedHours}} jam)</option>
+                    {{end}}
+                </select>
+                <p id="price_per_kg_display" class="text-xs text-slate-400 mt-1"></p>
+            </div>
+
+            <!-- Weight & Total -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="weight_kg" class="block text-sm font-medium text-slate-700 mb-1">Berat (Kg) <span class="text-red-500">*</span></label>
+                    <input type="number" id="weight_kg" name="weight_kg" required min="0.1" step="0.1"
+                        x-data x-on:input.debounce="
+                            const select = document.getElementById('service_id');
+                            const price = select.options[select.selectedIndex]?.dataset?.price || 0;
+                            const kg = $event.target.value || 0;
+                            const discount = parseFloat(document.getElementById('discount').value) || 0;
+                            const extra = parseFloat(document.getElementById('extra_cost').value) || 0;
+                            const total = (price * kg) - discount + extra;
+                            document.getElementById('price_display').textContent = 'Rp ' + Math.max(0, total).toLocaleString('id-ID');
+                        "
+                        class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                </div>
+                <div>
+                    <label for="discount" class="block text-sm font-medium text-slate-700 mb-1">Diskon</label>
+                    <input type="number" id="discount" name="discount" min="0" value="0"
+                        x-data x-on:input.debounce="
+                            const select = document.getElementById('service_id');
+                            const price = select.options[select.selectedIndex]?.dataset?.price || 0;
+                            const kg = document.getElementById('weight_kg').value || 0;
+                            const discount = $event.target.value || 0;
+                            const extra = parseFloat(document.getElementById('extra_cost').value) || 0;
+                            const total = (price * kg) - discount + extra;
+                            document.getElementById('price_display').textContent = 'Rp ' + Math.max(0, total).toLocaleString('id-ID');
+                        "
+                        class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                </div>
+                <div>
+                    <label for="extra_cost" class="block text-sm font-medium text-slate-700 mb-1">Biaya Tambahan</label>
+                    <input type="number" id="extra_cost" name="extra_cost" min="0" value="0"
+                        x-data x-on:input.debounce="
+                            const select = document.getElementById('service_id');
+                            const price = select.options[select.selectedIndex]?.dataset?.price || 0;
+                            const kg = document.getElementById('weight_kg').value || 0;
+                            const discount = parseFloat(document.getElementById('discount').value) || 0;
+                            const extra = $event.target.value || 0;
+                            const total = (price * kg) - discount + extra;
+                            document.getElementById('price_display').textContent = 'Rp ' + Math.max(0, total).toLocaleString('id-ID');
+                        "
+                        class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                </div>
+            </div>
+
+            <!-- Total Preview -->
+            <div class="bg-indigo-50 rounded-lg p-4 flex items-center justify-between">
+                <span class="text-sm font-medium text-indigo-800">Total perkiraan:</span>
+                <span id="price_display" class="text-lg font-bold text-indigo-900">Rp 0</span>
+            </div>
+
+            <!-- Date -->
+            <div>
+                <label for="entry_date" class="block text-sm font-medium text-slate-700 mb-1">Tanggal Masuk</label>
+                <input type="date" id="entry_date" name="entry_date" value="{{nowDate}}"
+                    class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+            </div>
+
+            <!-- Notes -->
+            <div>
+                <label for="notes" class="block text-sm font-medium text-slate-700 mb-1">Catatan</label>
+                <textarea id="notes" name="notes" rows="2"
+                    class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"></textarea>
+            </div>
+
+            <div class="flex items-center gap-3 pt-2">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    Simpan Pesanan
+                </button>
+                <a href="/orders" class="text-sm text-slate-500 hover:text-slate-700 transition">Batal</a>
+            </div>
+        </form>
+    </div>
+</div>
