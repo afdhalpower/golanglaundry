@@ -1,0 +1,160 @@
+<div class="space-y-6">
+    <!-- Header -->
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900">Laporan</h1>
+        <p class="text-sm text-slate-500 mt-1">Rekap pendapatan, pengeluaran, dan laba laundry</p>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+        <form action="/reports" method="GET" class="flex items-center gap-3 flex-wrap">
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Dari</label>
+                <input type="date" name="start" value="{{.startDate}}"
+                    class="px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Sampai</label>
+                <input type="date" name="end" value="{{.endDate}}"
+                    class="px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+            <div class="pt-4">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Tampilkan</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Pendapatan</p>
+            <p class="text-2xl font-bold text-emerald-600 mt-1">Rp {{printf "%.0f" .totalRevenue}}</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Pengeluaran</p>
+            <p class="text-2xl font-bold text-red-600 mt-1">Rp {{printf "%.0f" .totalExpense}}</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Laba Bersih</p>
+            <p class="text-2xl font-bold text-indigo-600 mt-1">Rp {{printf "%.0f" .profit}}</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Order</p>
+            <p class="text-2xl font-bold text-slate-900 mt-1">{{.orderCount}}</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Order Status Breakdown -->
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <h3 class="text-sm font-semibold text-slate-900 mb-4">Status Order</h3>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between text-xs font-medium text-slate-400 uppercase tracking-wider px-1">
+                    <span>Status</span>
+                    <div class="flex gap-6">
+                        <span class="w-16 text-right">Jumlah</span>
+                        <span class="w-24 text-right">Total</span>
+                    </div>
+                </div>
+                {{range .orderStats}}
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50">
+                    <span class="text-sm font-medium text-slate-700">
+                        {{if eq .Status "menunggu"}}Menunggu
+                        {{else if eq .Status "dicuci"}}Dicuci
+                        {{else if eq .Status "dikeringkan"}}Dikeringkan
+                        {{else if eq .Status "disetrika"}}Disetrika
+                        {{else if eq .Status "siap_diambil"}}Siap Diambil
+                        {{else if eq .Status "sudah_diambil"}}Sudah Diambil
+                        {{else if eq .Status "dibatalkan"}}Dibatalkan
+                        {{else}}{{.Status}}{{end}}
+                    </span>
+                    <div class="flex gap-6 text-sm">
+                        <span class="w-16 text-right font-semibold text-slate-900">{{.Count}}</span>
+                        <span class="w-24 text-right font-semibold text-slate-900">Rp {{printf "%.0f" .Total}}</span>
+                    </div>
+                </div>
+                {{else}}
+                <p class="text-sm text-slate-400 text-center py-4">Belum ada data</p>
+                {{end}}
+            </div>
+        </div>
+
+        <!-- Revenue Daily -->
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <h3 class="text-sm font-semibold text-slate-900 mb-4">Pendapatan Harian</h3>
+            <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs font-medium text-slate-400 uppercase tracking-wider px-1">
+                    <span>Tanggal</span>
+                    <div class="flex gap-6">
+                        <span class="w-16 text-right">Transaksi</span>
+                        <span class="w-24 text-right">Pendapatan</span>
+                    </div>
+                </div>
+                {{range .revenueDaily}}
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-slate-50">
+                    <span class="text-sm text-slate-600">{{.Date}}</span>
+                    <div class="flex gap-6 text-sm">
+                        <span class="w-16 text-right text-slate-700">{{.Count}}</span>
+                        <span class="w-24 text-right font-medium text-emerald-600">Rp {{printf "%.0f" .Amount}}</span>
+                    </div>
+                </div>
+                {{else}}
+                <p class="text-sm text-slate-400 text-center py-4">Belum ada data</p>
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Customers & Services -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <h3 class="text-sm font-semibold text-slate-900 mb-4">Pelanggan Terbanyak</h3>
+            <div class="space-y-3">
+                {{range $i, $c := .topCustomers}}
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-slate-50">
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">{{add $i 1}}</span>
+                        <span class="text-sm font-medium text-slate-700">{{$c.Name}}</span>
+                    </div>
+                    <div class="text-right text-sm">
+                        <span class="text-slate-500">{{$c.OrderCount}}x</span>
+                        <span class="ml-3 font-medium text-slate-900">Rp {{printf "%.0f" $c.Total}}</span>
+                    </div>
+                </div>
+                {{else}}
+                <p class="text-sm text-slate-400 text-center py-4">Belum ada data</p>
+                {{end}}
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <h3 class="text-sm font-semibold text-slate-900 mb-4">Layanan Terlaris</h3>
+            <div class="space-y-3">
+                {{range $i, $s := .topServices}}
+                <div class="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-slate-50">
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold">{{add $i 1}}</span>
+                        <span class="text-sm font-medium text-slate-700">{{$s.Name}}</span>
+                    </div>
+                    <div class="text-right text-sm">
+                        <span class="text-slate-500">{{$s.UsageCount}}x</span>
+                        <span class="ml-3 font-medium text-slate-900">Rp {{printf "%.0f" $s.TotalRevenue}}</span>
+                    </div>
+                </div>
+                {{else}}
+                <p class="text-sm text-slate-400 text-center py-4">Belum ada data</p>
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Buttons -->
+    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <h3 class="text-sm font-semibold text-slate-900 mb-4">Export Data</h3>
+        <div class="flex items-center gap-3 flex-wrap">
+            <a href="/reports/export/revenue?start={{.startDate}}&end={{.endDate}}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">CSV Pendapatan</a>
+            <a href="/reports/export/orders?start={{.startDate}}&end={{.endDate}}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">CSV Order</a>
+            <a href="/reports/export/profit?start={{.startDate}}&end={{.endDate}}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">CSV Laba</a>
+        </div>
+    </div>
+</div>

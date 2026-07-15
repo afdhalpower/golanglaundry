@@ -34,6 +34,8 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	expenseRepo := repositories.NewExpenseRepository(db)
 	inventoryRepo := repositories.NewInventoryRepository(db)
 
+	reportRepo := repositories.NewReportRepository(db)
+
 	// Initialize services
 	authService := services.NewAuthService(userRepo)
 	dashboardService := services.NewDashboardService(dashboardRepo)
@@ -44,6 +46,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	expenseCategoryService := services.NewExpenseCategoryService(expenseCategoryRepo)
 	expenseService := services.NewExpenseService(expenseRepo)
 	inventoryService := services.NewInventoryService(inventoryRepo)
+	reportService := services.NewReportService(reportRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
@@ -55,6 +58,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
 	expenseHandler := handlers.NewExpenseHandler(expenseService, expenseCategoryService)
 	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
+	reportHandler := handlers.NewReportHandler(reportService)
 
 	// Health check
 	app.Get("/health", func(c fiber.Ctx) error {
@@ -130,6 +134,11 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	inventory.Get("/:id/edit", inventoryHandler.Edit)
 	inventory.Post("/:id", inventoryHandler.Update)
 	inventory.Post("/:id/delete", inventoryHandler.Delete)
+
+	// Reports
+	reports := protected.Group("/reports")
+	reports.Get("/", reportHandler.Index)
+	reports.Get("/export/:type", reportHandler.ExportCSV)
 
 	slog.Info("routes registered successfully")
 }
