@@ -56,8 +56,8 @@ func (s *PaymentService) CreateOrUpdate(orderID uint, amount float64, method, no
 		CreatedBy:   userID,
 	}
 
-	existing, _ := s.paymentRepo.FindByOrderID(orderID)
-	if existing != nil {
+	existing, err := s.paymentRepo.FindByOrderID(orderID)
+	if err == nil {
 		// Update existing
 		existing.Amount = amount
 		existing.Method = method

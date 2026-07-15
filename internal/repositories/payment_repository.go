@@ -37,6 +37,9 @@ func (r *PaymentRepository) FindByID(id uint) (*models.Payment, error) {
 func (r *PaymentRepository) FindByOrderID(orderID uint) (*models.Payment, error) {
 	var payment models.Payment
 	err := r.db.Where("order_id = ?", orderID).First(&payment).Error
+	if err != nil {
+		return nil, err
+	}
 	return &payment, err
 }
 
