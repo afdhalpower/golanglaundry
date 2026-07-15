@@ -1,0 +1,27 @@
+server:
+  host: "0.0.0.0"
+  port: 3000
+  read_timeout: 10s
+  write_timeout: 10s
+
+database:
+  host: "localhost"
+  port: 5432
+  user: "golanglaundry"
+  password: "golanglaundry_secret"
+  name: "golanglaundry"
+  sslmode: "disable"
+  max_open_conns: 25
+  max_idle_conns: 10
+  conn_max_lifetime: 5m
+
+session:
+  secret: "change-me-in-production"
+  max_age: 86400
+  http_only: true
+  secure: false
+
+app:
+  name: "Laundry Management System"
+  environment: "development"
+  debug: true
