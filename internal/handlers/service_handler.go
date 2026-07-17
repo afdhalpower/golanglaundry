@@ -47,6 +47,21 @@ func (h *ServiceHandler) New(c fiber.Ctx) error {
 	return render(c, "services/form", fiber.Map{
 		"title":   "Tambah Layanan",
 		"service": nil,
+		"errors":  fiber.Map{},
+	}, "layouts/main")
+}
+
+func (h *ServiceHandler) Edit(c fiber.Ctx) error {
+	id, _ := strconv.ParseUint(c.Params("id"), 10, 32)
+	service, err := h.service.GetByID(uint(id))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).SendString("Layanan tidak ditemukan")
+	}
+
+	return render(c, "services/form", fiber.Map{
+		"title":   "Edit Layanan",
+		"service": service,
+		"errors":  fiber.Map{},
 	}, "layouts/main")
 }
 
@@ -83,19 +98,6 @@ func (h *ServiceHandler) Create(c fiber.Ctx) error {
 	}
 
 	return c.Redirect().To("/services")
-}
-
-func (h *ServiceHandler) Edit(c fiber.Ctx) error {
-	id, _ := strconv.ParseUint(c.Params("id"), 10, 32)
-	service, err := h.service.GetByID(uint(id))
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).SendString("Layanan tidak ditemukan")
-	}
-
-	return render(c, "services/form", fiber.Map{
-		"title":   "Edit Layanan",
-		"service": service,
-	}, "layouts/main")
 }
 
 func (h *ServiceHandler) Update(c fiber.Ctx) error {
