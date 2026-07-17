@@ -1,0 +1,87 @@
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Riwayat Stok</h1>
+            <p class="text-sm text-slate-500 mt-1">{{.item.Name}}</p>
+        </div>
+        <a href="/inventory" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-lg text-sm font-medium transition inline-flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Kembali
+        </a>
+    </div>
+
+    <!-- Item Info -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+                <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Nama Barang</p>
+                <p class="text-sm font-semibold text-slate-900 mt-1">{{.item.Name}}</p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Kategori</p>
+                <p class="text-sm text-slate-700 mt-1">{{.item.Category}}</p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Stok Saat Ini</p>
+                <p class="text-sm font-semibold {{if le .item.Stock .item.MinStock}}text-red-600{{else}}text-green-600{{end}} mt-1">{{.item.Stock}} {{.item.Unit}}</p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Min. Stok</p>
+                <p class="text-sm text-slate-700 mt-1">{{.item.MinStock}} {{.item.Unit}}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movements Table -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200">
+                        <th class="text-left px-4 py-3 font-semibold text-slate-700">Waktu</th>
+                        <th class="text-center px-4 py-3 font-semibold text-slate-700">Tipe</th>
+                        <th class="text-center px-4 py-3 font-semibold text-slate-700">Jumlah</th>
+                        <th class="text-center px-4 py-3 font-semibold text-slate-700">Stok Sebelum</th>
+                        <th class="text-center px-4 py-3 font-semibold text-slate-700">Stok Sesudah</th>
+                        <th class="text-left px-4 py-3 font-semibold text-slate-700">Catatan</th>
+                        <th class="text-right px-4 py-3 font-semibold text-slate-700">Oleh</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {{range .movements}}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="px-4 py-3 text-slate-600 whitespace-nowrap">{{.CreatedAt.Format "02 Jan 2006 15:04"}}</td>
+                        <td class="px-4 py-3 text-center">
+                            {{if eq .Type "in"}}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                Masuk
+                            </span>
+                            {{else}}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                Keluar
+                            </span>
+                            {{end}}
+                        </td>
+                        <td class="px-4 py-3 text-center font-medium {{if eq .Type "in"}}text-green-600{{else}}text-red-600{{end}}">
+                            {{if eq .Type "in"}}+{{end}}{{.Quantity}}
+                        </td>
+                        <td class="px-4 py-3 text-center text-slate-600">{{.PreviousStock}}</td>
+                        <td class="px-4 py-3 text-center text-slate-600">{{.NewStock}}</td>
+                        <td class="px-4 py-3 text-slate-500 max-w-xs truncate">{{.Note}}</td>
+                        <td class="px-4 py-3 text-right text-slate-600">
+                            {{if .User}}{{.User.Name}}{{else}}Sistem{{end}}
+                        </td>
+                    </tr>
+                    {{else}}
+                    <tr>
+                        <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+                            <svg class="w-10 h-10 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                            <p>Belum ada riwayat pergerakan stok</p>
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

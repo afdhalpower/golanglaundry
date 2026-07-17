@@ -182,6 +182,10 @@ func (s *OrderService) Delete(id uint) error {
 	return s.orderRepo.Delete(id)
 }
 
+func (s *OrderService) GetPayment(orderID uint) (*models.Payment, error) {
+	return s.orderRepo.FindPaymentByOrderID(orderID)
+}
+
 func (s *OrderService) GetStatusList() []string {
 	return []string{"menunggu", "dicuci", "dikeringkan", "disetrika", "siap_diambil", "sudah_diambil", "dibatalkan"}
 }

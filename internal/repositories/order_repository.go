@@ -83,6 +83,15 @@ func (r *OrderRepository) Update(order *models.Order) error {
 	return r.db.Save(order).Error
 }
 
+func (r *OrderRepository) FindPaymentByOrderID(orderID uint) (*models.Payment, error) {
+	var payment models.Payment
+	err := r.db.Where("order_id = ?", orderID).First(&payment).Error
+	if err != nil {
+		return nil, err
+	}
+	return &payment, nil
+}
+
 func (r *OrderRepository) Delete(id uint) error {
 	return r.db.Delete(&models.Order{}, id).Error
 }

@@ -130,10 +130,10 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(document.getElementById('revenueChart'), {
         type: 'line',
         data: {
-            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+            labels: {{.labels}},
             datasets: [{
                 label: 'Pendapatan',
-                data: [0, 0, 0, 0, 0, 0, 0],
+                data: {{.revenueData}},
                 borderColor: '#6366f1',
                 backgroundColor: 'rgba(99, 102, 241, 0.1)',
                 fill: true,
@@ -158,10 +158,10 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(document.getElementById('orderChart'), {
         type: 'bar',
         data: {
-            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+            labels: {{.labels}},
             datasets: [{
                 label: 'Order',
-                data: [0, 0, 0, 0, 0, 0, 0],
+                data: {{.orderData}},
                 backgroundColor: '#818cf8',
                 borderRadius: 6,
                 borderSkipped: false

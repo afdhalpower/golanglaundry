@@ -15,12 +15,16 @@ func NewPaymentRepository(db *gorm.DB) *PaymentRepository {
 	return &PaymentRepository{db: db}
 }
 
-func (r *PaymentRepository) FindAll(page, limit int, status string) ([]models.Payment, int64, error) {
+func (r *PaymentRepository) FindAll(page, limit int, status, search string) ([]models.Payment, int64, error) {
 	var payments []models.Payment
 	var total int64
 	query := r.db.Model(&models.Payment{})
 	if status != "" {
 		query = query.Where("status = ?", status)
+	}
+	if search != "" {
+		query = query.Joins("JOIN orders ON orders.id = payments.order_id").
+			Where("orders.order_number ILIKE ?", "%"+search+"%")
 	}
 	query.Count(&total)
 	offset := (page - 1) * limit

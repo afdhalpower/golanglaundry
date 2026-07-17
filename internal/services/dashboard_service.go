@@ -24,6 +24,63 @@ func NewDashboardService(dashboardRepo *repositories.DashboardRepository) *Dashb
 	return &DashboardService{dashboardRepo: dashboardRepo}
 }
 
+type ChartData struct {
+	Revenue     []float64
+	OrderCounts []int64
+	Labels      []string
+}
+
+func (s *DashboardService) GetChartData() (*ChartData, error) {
+	const days = 6 // last 7 days (today and 6 days back)
+
+	revenueRows, err := s.dashboardRepo.GetDailyRevenue(days)
+	if err != nil {
+		return nil, err
+	}
+
+	orderRows, err := s.dashboardRepo.GetDailyOrderCounts(days)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build lookup maps from DB results
+	revenueMap := make(map[string]float64, len(revenueRows))
+	for _, r := range revenueRows {
+		revenueMap[r.Date.Format("2006-01-02")] = r.Total
+	}
+
+	orderMap := make(map[string]int64, len(orderRows))
+	for _, r := range orderRows {
+		orderMap[r.Date.Format("2006-01-02")] = r.Count
+	}
+
+	// Indonesian day labels (dynamic, aligned with data order)
+	labelMap := map[string]string{
+		"Monday": "Sen", "Tuesday": "Sel", "Wednesday": "Rab",
+		"Thursday": "Kam", "Friday": "Jum", "Saturday": "Sab", "Sunday": "Min",
+	}
+
+	labels := make([]string, 7)
+	revenue := make([]float64, 7)
+	orderCounts := make([]int64, 7)
+	now := time.Now()
+
+	for i := 6; i >= 0; i-- {
+		date := now.AddDate(0, 0, -i)
+		dateStr := date.Format("2006-01-02")
+		idx := 6 - i // 0 = 6 days ago, 6 = today
+		revenue[idx] = revenueMap[dateStr]
+		orderCounts[idx] = orderMap[dateStr]
+		labels[idx] = labelMap[date.Weekday().String()]
+	}
+
+	return &ChartData{
+		Revenue:     revenue,
+		OrderCounts: orderCounts,
+		Labels:      labels,
+	}, nil
+}
+
 func (s *DashboardService) GetStats() (*DashboardStats, error) {
 	now := time.Now()
 	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())

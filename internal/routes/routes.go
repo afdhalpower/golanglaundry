@@ -33,6 +33,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	expenseCategoryRepo := repositories.NewExpenseCategoryRepository(db)
 	expenseRepo := repositories.NewExpenseRepository(db)
 	inventoryRepo := repositories.NewInventoryRepository(db)
+	stockMovementRepo := repositories.NewStockMovementRepository(db)
 	settingRepo := repositories.NewSettingRepository(db)
 	reportRepo := repositories.NewReportRepository(db)
 
@@ -45,7 +46,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	paymentService := services.NewPaymentService(paymentRepo, orderRepo)
 	expenseCategoryService := services.NewExpenseCategoryService(expenseCategoryRepo)
 	expenseService := services.NewExpenseService(expenseRepo)
-	inventoryService := services.NewInventoryService(inventoryRepo)
+	inventoryService := services.NewInventoryService(inventoryRepo, stockMovementRepo)
 	userService := services.NewUserService(userRepo)
 	settingService := services.NewSettingService(settingRepo)
 	reportService := services.NewReportService(reportRepo)
@@ -56,7 +57,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	profileHandler := handlers.NewProfileHandler(authService, userRepo)
 	customerHandler := handlers.NewCustomerHandler(customerService)
 	serviceHandler := handlers.NewServiceHandler(serviceService)
-	orderHandler := handlers.NewOrderHandler(orderService, customerService, serviceService)
+	orderHandler := handlers.NewOrderHandler(orderService, customerService, serviceService, paymentService, settingService)
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
 	expenseHandler := handlers.NewExpenseHandler(expenseService, expenseCategoryService)
 	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
@@ -113,6 +114,8 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	orders.Post("/", orderHandler.Create)
 	orders.Get("/:id", orderHandler.Show)
 	orders.Post("/:id/status", orderHandler.UpdateStatus)
+	orders.Get("/:id/print", orderHandler.Print)
+	orders.Post("/:id/pay", orderHandler.Pay)
 	orders.Post("/:id/delete", orderHandler.Delete)
 
 	// Payments
@@ -135,6 +138,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	inventory.Get("/", inventoryHandler.Index)
 	inventory.Get("/new", inventoryHandler.New)
 	inventory.Post("/", inventoryHandler.Create)
+	inventory.Get("/:id/movements", inventoryHandler.Movements)
 	inventory.Get("/:id/edit", inventoryHandler.Edit)
 	inventory.Post("/:id", inventoryHandler.Update)
 	inventory.Post("/:id/delete", inventoryHandler.Delete)

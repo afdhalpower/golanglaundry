@@ -33,12 +33,15 @@ func NewExpenseRepository(db *gorm.DB) *ExpenseRepository {
 	return &ExpenseRepository{db: db}
 }
 
-func (r *ExpenseRepository) FindAll(page, limit int, categoryID string) ([]models.Expense, int64, error) {
+func (r *ExpenseRepository) FindAll(page, limit int, categoryID, search string) ([]models.Expense, int64, error) {
 	var expenses []models.Expense
 	var total int64
 	query := r.db.Model(&models.Expense{})
 	if categoryID != "" {
 		query = query.Where("expense_category_id = ?", categoryID)
+	}
+	if search != "" {
+		query = query.Where("description ILIKE ?", "%"+search+"%")
 	}
 	query.Count(&total)
 	offset := (page - 1) * limit

@@ -12,7 +12,7 @@ import (
 )
 
 type ExpenseHandler struct {
-	expenseService *services.ExpenseService
+	expenseService  *services.ExpenseService
 	categoryService *services.ExpenseCategoryService
 }
 
@@ -27,8 +27,9 @@ func (h *ExpenseHandler) Index(c fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	limit, _ := strconv.Atoi(c.Query("limit", "10"))
 	categoryID := c.Query("category_id", "")
+	search := c.Query("search", "")
 
-	expenses, total, err := h.expenseService.GetAll(page, limit, categoryID)
+	expenses, total, err := h.expenseService.GetAll(page, limit, categoryID, search)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Gagal memuat pengeluaran")
 	}
@@ -45,6 +46,7 @@ func (h *ExpenseHandler) Index(c fiber.Ctx) error {
 		"expenses":   expenses,
 		"categories": categories,
 		"categoryID": categoryID,
+		"search":     search,
 		"page":       page,
 		"limit":      limit,
 		"total":      total,

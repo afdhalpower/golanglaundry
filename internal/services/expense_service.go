@@ -35,14 +35,14 @@ func NewExpenseService(repo *repositories.ExpenseRepository) *ExpenseService {
 	return &ExpenseService{repo: repo}
 }
 
-func (s *ExpenseService) GetAll(page, limit int, categoryID string) ([]models.Expense, int64, error) {
+func (s *ExpenseService) GetAll(page, limit int, categoryID, search string) ([]models.Expense, int64, error) {
 	if page < 1 {
 		page = 1
 	}
 	if limit < 1 || limit > 100 {
 		limit = 10
 	}
-	return s.repo.FindAll(page, limit, categoryID)
+	return s.repo.FindAll(page, limit, categoryID, search)
 }
 
 func (s *ExpenseService) GetByID(id uint) (*models.Expense, error) {

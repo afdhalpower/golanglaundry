@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 
+	"github.com/afdhalpower/golanglaundry/internal/helpers"
 	"github.com/afdhalpower/golanglaundry/internal/models"
 	"github.com/afdhalpower/golanglaundry/internal/services"
 )
@@ -66,7 +67,9 @@ func (h *InventoryHandler) Create(c fiber.Ctx) error {
 		Description: c.FormValue("description"),
 	}
 
-	if err := h.service.Create(item); err != nil {
+	userID := helpers.LogAndGetUserID(c)
+
+	if err := h.service.Create(item, userID); err != nil {
 		return render(c, "inventory/form", fiber.Map{
 			"title": "Tambah Barang",
 			"item":  item,
@@ -107,7 +110,9 @@ func (h *InventoryHandler) Update(c fiber.Ctx) error {
 	item.Unit = c.FormValue("unit")
 	item.Description = c.FormValue("description")
 
-	if err := h.service.Update(item); err != nil {
+	userID := helpers.LogAndGetUserID(c)
+
+	if err := h.service.Update(item, userID); err != nil {
 		return render(c, "inventory/form", fiber.Map{
 			"title": "Edit Barang",
 			"item":  item,
@@ -122,4 +127,24 @@ func (h *InventoryHandler) Delete(c fiber.Ctx) error {
 	id, _ := strconv.ParseUint(c.Params("id"), 10, 32)
 	h.service.Delete(uint(id))
 	return c.Redirect().To("/inventory")
+}
+
+func (h *InventoryHandler) Movements(c fiber.Ctx) error {
+	id, _ := strconv.ParseUint(c.Params("id"), 10, 32)
+
+	item, err := h.service.GetByID(uint(id))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).SendString("Barang tidak ditemukan")
+	}
+
+	movements, err := h.service.GetMovements(uint(id))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("Gagal memuat riwayat stok")
+	}
+
+	return render(c, "inventory/movements", fiber.Map{
+		"title":     "Riwayat Stok - " + item.Name,
+		"item":      item,
+		"movements": movements,
+	}, "layouts/main")
 }

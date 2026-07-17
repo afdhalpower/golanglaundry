@@ -18,14 +18,14 @@ func NewPaymentService(paymentRepo *repositories.PaymentRepository, orderRepo *r
 	return &PaymentService{paymentRepo: paymentRepo, orderRepo: orderRepo}
 }
 
-func (s *PaymentService) GetAll(page, limit int, status string) ([]models.Payment, int64, error) {
+func (s *PaymentService) GetAll(page, limit int, status, search string) ([]models.Payment, int64, error) {
 	if page < 1 {
 		page = 1
 	}
 	if limit < 1 || limit > 100 {
 		limit = 10
 	}
-	return s.paymentRepo.FindAll(page, limit, status)
+	return s.paymentRepo.FindAll(page, limit, status, search)
 }
 
 func (s *PaymentService) GetByID(id uint) (*models.Payment, error) {

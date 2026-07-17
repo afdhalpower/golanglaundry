@@ -62,6 +62,7 @@ func RunAutoMigration(db *gorm.DB) error {
 		&models.OrderTracking{},
 		&models.ExpenseCategory{},
 		&models.Inventory{},
+		&models.StockMovement{},
 		&models.Setting{},
 	)
 	if err != nil {

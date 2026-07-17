@@ -13,17 +13,23 @@ type OrderHandler struct {
 	orderService    *services.OrderService
 	customerService *services.CustomerService
 	serviceService  *services.ServiceService
+	paymentService  *services.PaymentService
+	settingService  *services.SettingService
 }
 
 func NewOrderHandler(
 	orderService *services.OrderService,
 	customerService *services.CustomerService,
 	serviceService *services.ServiceService,
+	paymentService *services.PaymentService,
+	settingService *services.SettingService,
 ) *OrderHandler {
 	return &OrderHandler{
 		orderService:    orderService,
 		customerService: customerService,
 		serviceService:  serviceService,
+		paymentService:  paymentService,
+		settingService:  settingService,
 	}
 }
 
@@ -118,11 +124,13 @@ func (h *OrderHandler) Show(c fiber.Ctx) error {
 	}
 
 	validNext := h.orderService.GetValidNextStatuses(order.Status)
+	payment, _ := h.orderService.GetPayment(uint(id))
 
 	return render(c, "orders/show", fiber.Map{
 		"title":     "Detail Pesanan",
 		"order":     order,
 		"validNext": validNext,
+		"payment":   payment,
 	}, "layouts/main")
 }
 
@@ -154,4 +162,57 @@ func (h *OrderHandler) Delete(c fiber.Ctx) error {
 	id, _ := strconv.ParseUint(c.Params("id"), 10, 32)
 	h.orderService.Delete(uint(id))
 	return c.Redirect().To("/orders")
+}
+
+func (h *OrderHandler) Print(c fiber.Ctx) error {
+	id, _ := strconv.ParseUint(c.Params("id"), 10, 32)
+	order, err := h.orderService.GetByID(uint(id))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).SendString("Pesanan tidak ditemukan")
+	}
+
+	settings, _ := h.settingService.GetAll()
+	laundryName := settings["laundry_name"]
+	if laundryName == "" {
+		laundryName = "Laundry Management"
+	}
+
+	payment, _ := h.orderService.GetPayment(uint(id))
+
+	return c.Render("orders/print", fiber.Map{
+		"order":          order,
+		"laundryName":    laundryName,
+		"laundryAddress": settings["laundry_address"],
+		"laundryPhone":   settings["laundry_phone"],
+		"payment":        payment,
+	})
+}
+
+func (h *OrderHandler) Pay(c fiber.Ctx) error {
+	id, _ := strconv.ParseUint(c.Params("id"), 10, 32)
+	userID := helpers.LogAndGetUserID(c)
+	method := c.FormValue("method")
+	note := c.FormValue("note")
+
+	order, err := h.orderService.GetByID(uint(id))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).SendString("Pesanan tidak ditemukan")
+	}
+
+	// Check if order can be paid (not cancelled, not already paid)
+	if order.Status == "dibatalkan" {
+		return c.Status(fiber.StatusBadRequest).SendString("Pesanan yang dibatalkan tidak bisa dibayar")
+	}
+
+	existingPayment, _ := h.orderService.GetPayment(uint(id))
+	if existingPayment != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Pesanan sudah dibayar")
+	}
+
+	_, err = h.paymentService.CreateOrUpdate(uint(id), 0, method, note, userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Redirect().To("/orders/" + c.Params("id"))
 }

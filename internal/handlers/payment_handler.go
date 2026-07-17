@@ -21,8 +21,9 @@ func (h *PaymentHandler) Index(c fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	limit, _ := strconv.Atoi(c.Query("limit", "10"))
 	status := c.Query("status", "")
+	search := c.Query("search", "")
 
-	payments, total, err := h.service.GetAll(page, limit, status)
+	payments, total, err := h.service.GetAll(page, limit, status, search)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Gagal memuat pembayaran")
 	}
@@ -36,6 +37,7 @@ func (h *PaymentHandler) Index(c fiber.Ctx) error {
 		"title":      "Pembayaran",
 		"payments":   payments,
 		"status":     status,
+		"search":     search,
 		"page":       page,
 		"limit":      limit,
 		"total":      total,
