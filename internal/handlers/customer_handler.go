@@ -47,6 +47,7 @@ func (h *CustomerHandler) New(c fiber.Ctx) error {
 	return render(c, "customers/form", fiber.Map{
 		"title":    "Tambah Pelanggan",
 		"customer": nil,
+		"errors":   fiber.Map{},
 	}, "layouts/main")
 }
 
