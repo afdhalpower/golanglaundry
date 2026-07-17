@@ -7,6 +7,24 @@ import (
 	"gorm.io/gorm"
 )
 
+// RecentTrackingItem holds the result of an order_tracking JOIN with orders & customers.
+type RecentTrackingItem struct {
+	OrderNumber  string
+	CustomerName string
+	Status       string
+	Note         string
+	CreatedBy    uint
+	CreatedAt    time.Time
+}
+
+// OverdueOrderItem holds minimal overdue order info for the alert card.
+type OverdueOrderItem struct {
+	ID               uint
+	OrderNumber      string
+	CustomerName     string
+	EstimatedDoneDate time.Time
+}
+
 type DashboardRepository struct {
 	db *gorm.DB
 }
@@ -76,6 +94,43 @@ func (r *DashboardRepository) CountAllCustomers() (int64, error) {
 	var count int64
 	err := r.db.Model(&models.Customer{}).Count(&count).Error
 	return count, err
+}
+
+// GetRecentTracking returns the most recent tracking entries with order & customer info.
+func (r *DashboardRepository) GetRecentTracking(limit int) ([]RecentTrackingItem, error) {
+	var items []RecentTrackingItem
+	err := r.db.Table("order_tracking").
+		Select(`orders.order_number, customers.name as customer_name, order_tracking.status,
+		        COALESCE(order_tracking.note, '') as note, order_tracking.created_by, order_tracking.created_at`).
+		Joins("JOIN orders ON orders.id = order_tracking.order_id").
+		Joins("JOIN customers ON customers.id = orders.customer_id").
+		Order("order_tracking.created_at DESC").
+		Limit(limit).
+		Scan(&items).Error
+	return items, err
+}
+
+// CountOverdueOrders returns the count of orders past their estimated done date and not yet completed/cancelled.
+func (r *DashboardRepository) CountOverdueOrders() (int64, error) {
+	var count int64
+	now := time.Now()
+	err := r.db.Model(&models.Order{}).
+		Where("estimated_done_date < ? AND status NOT IN ?", now, []string{"sudah_diambil", "dibatalkan"}).
+		Count(&count).Error
+	return count, err
+}
+
+// GetOverdueOrders returns the list of overdue orders with customer name.
+func (r *DashboardRepository) GetOverdueOrders() ([]OverdueOrderItem, error) {
+	var items []OverdueOrderItem
+	now := time.Now()
+	err := r.db.Table("orders").
+		Select("orders.id, orders.order_number, customers.name as customer_name, orders.estimated_done_date").
+		Joins("JOIN customers ON customers.id = orders.customer_id").
+		Where("orders.estimated_done_date < ? AND orders.status NOT IN ?", now, []string{"sudah_diambil", "dibatalkan"}).
+		Order("orders.estimated_done_date ASC").
+		Scan(&items).Error
+	return items, err
 }
 
 func (r *DashboardRepository) SumExpensesSince(since time.Time) (float64, error) {

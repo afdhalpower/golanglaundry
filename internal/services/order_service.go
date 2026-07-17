@@ -197,3 +197,36 @@ func (s *OrderService) GetValidNextStatuses(currentStatus string) []string {
 func (s *OrderService) GetStatusCounts() (map[string]int64, error) {
 	return s.orderRepo.GetStatusCounts()
 }
+
+func (s *OrderService) GetCompletedTodayCount() (int64, error) {
+	return s.orderRepo.GetCompletedTodayCount()
+}
+
+func (s *OrderService) QuickUpdateStatus(id uint, newStatus string, userID uint) error {
+	statusLabels := map[string]string{
+		"menunggu":     "Menunggu",
+		"dicuci":       "Dicuci",
+		"dikeringkan":  "Dikeringkan",
+		"disetrika":    "Disetrika",
+		"siap_diambil": "Siap Diambil",
+		"sudah_diambil": "Sudah Diambil",
+		"dibatalkan":   "Dibatalkan",
+	}
+
+	order, err := s.orderRepo.FindByID(id)
+	if err != nil {
+		return errors.New("order tidak ditemukan")
+	}
+
+	note := statusLabels[order.Status]
+	if note == "" {
+		note = order.Status
+	}
+	nextLabel := statusLabels[newStatus]
+	if nextLabel == "" {
+		nextLabel = newStatus
+	}
+	autoNote := fmt.Sprintf("Status diubah dari %s ke %s (Quick Action)", note, nextLabel)
+
+	return s.UpdateStatus(id, newStatus, autoNote, userID)
+}

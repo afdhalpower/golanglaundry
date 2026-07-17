@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="space-y-6" x-data="{ updating: null, modal: false, action: '', itemName: '' }">
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-2xl font-bold text-slate-900">Pesanan</h1>
@@ -8,6 +8,54 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Tambah Pesanan
         </a>
+    </div>
+
+    <!-- Quick Stats Bar -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Menunggu</p>
+                    <p class="text-2xl font-bold text-slate-900">{{index .counts "menunggu"}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Diproses</p>
+                    <p class="text-2xl font-bold text-slate-900">{{.processingCount}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Siap Ambil</p>
+                    <p class="text-2xl font-bold text-slate-900">{{index .counts "siap_diambil"}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Selesai Hari Ini</p>
+                    <p class="text-2xl font-bold text-slate-900">{{.completedToday}}</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Filter & Search -->
@@ -22,7 +70,7 @@
                 <option value="">Semua Status</option>
                 {{range $s := .statuses}}
                 <option value="{{$s}}" {{if eq $.status $s}}selected{{end}}>
-                    {{if eq $s "menunggu"}}Menunggu{{else if eq $s "dicuci"}}Dicuci{{else if eq $s "dikeringkan"}}Dikeringkan{{else if eq $s "disetrika"}}Disetrika{{else if eq $s "siap_diambil"}}Siap Diambil{{else if eq $s "sudah_diambil"}}Sudah Diambil{{else if eq $s "dibatalkan"}}Dibatalkan{{end}}
+                    {{statusLabel $s}}
                 </option>
                 {{end}}
             </select>
@@ -50,7 +98,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     {{range .orders}}
-                    <tr class="hover:bg-slate-50 transition">
+                    <tr class="hover:bg-slate-50 transition" x-data="{ open: false, loading: false }">
                         <td class="px-4 py-3">
                             <span class="font-mono text-xs font-medium text-slate-800">{{.OrderNumber}}</span>
                         </td>
@@ -73,9 +121,9 @@
                             {{else if eq .Status "disetrika"}}
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700"><span class="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>Disetrika</span>
                             {{else if eq .Status "siap_diambil"}}
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700"><span class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>Siap Diambil</span>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>Siap Diambil</span>
                             {{else if eq .Status "sudah_diambil"}}
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>Sudah Diambil</span>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700"><span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>Sudah Diambil</span>
                             {{else if eq .Status "dibatalkan"}}
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700"><span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>Dibatalkan</span>
                             {{end}}
@@ -83,14 +131,61 @@
                         <td class="px-4 py-3 text-center text-sm text-slate-500">{{.CreatedAt.Format "02/01"}}</td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex items-center justify-end gap-2">
+                                {{$validNext := index $.orderValidNext .ID}}
+                                {{if $validNext}}
+                                <!-- Quick Action Dropdown -->
+                                <div class="relative" @click.outside="open = false">
+                                    <button @click="open = !open" :disabled="loading"
+                                        class="text-slate-400 hover:text-indigo-600 transition p-1 disabled:opacity-50" title="Ubah Status">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </button>
+                                    <div x-show="open"
+                                         x-cloak
+                                         x-transition:enter="transition ease-out duration-100"
+                                         x-transition:enter-start="transform opacity-0 scale-95"
+                                         x-transition:enter-end="transform opacity-100 scale-100"
+                                         x-transition:leave="transition ease-in duration-75"
+                                         x-transition:leave-start="transform opacity-100 scale-100"
+                                         x-transition:leave-end="transform opacity-0 scale-95"
+                                         class="absolute right-0 mt-1 w-48 origin-top-right bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1">
+                                        {{range $validNext}}
+                                        <button @click="
+                                            loading = true;
+                                            open = false;
+                                            fetch('/orders/{{$.ID}}/quick-status', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ status: '{{.}}' })
+                                            })
+                                            .then(r => r.json())
+                                            .then(data => {
+                                                loading = false;
+                                                if (data.success) {
+                                                    $store.toast.showToast(data.message || 'Status berhasil diperbarui', 'success');
+                                                    setTimeout(() => window.location.reload(), 800);
+                                                } else {
+                                                    $store.toast.showToast(data.message || 'Gagal memperbarui status', 'error');
+                                                }
+                                            })
+                                            .catch(() => {
+                                                loading = false;
+                                                $store.toast.showToast('Terjadi kesalahan jaringan', 'error');
+                                            });
+                                        "
+                                        class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">
+                                            {{statusLabel .}}
+                                        </button>
+                                        {{end}}
+                                    </div>
+                                </div>
+                                {{end}}
                                 <a href="/orders/{{.ID}}" class="text-slate-400 hover:text-indigo-600 transition p-1" title="Detail">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                 </a>
-                                <form action="/orders/{{.ID}}/delete" method="POST" class="inline" onsubmit="return confirm('Hapus pesanan {{.OrderNumber}}?')">
-                                    <button type="submit" class="text-slate-400 hover:text-red-600 transition p-1" title="Hapus">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </form>
+                                <!-- Delete Button with Modal -->
+                                <button type="button" @click="modal = true; action = '/orders/{{.ID}}/delete'; itemName = '{{.OrderNumber}}'" class="text-slate-400 hover:text-red-600 transition p-1" title="Hapus">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -109,4 +204,5 @@
     </div>
 
     {{template "partials/pagination" .}}
+    {{template "partials/delete_modal" .}}
 </div>

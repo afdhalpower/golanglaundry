@@ -8,6 +8,11 @@ import (
 	"gorm.io/gorm"
 )
 
+type StatusCount struct {
+	Status string
+	Count  int64
+}
+
 type OrderRepository struct {
 	db *gorm.DB
 }
@@ -109,10 +114,6 @@ func (r *OrderRepository) BeginTx() *gorm.DB {
 }
 
 func (r *OrderRepository) GetStatusCounts() (map[string]int64, error) {
-	type StatusCount struct {
-		Status string
-		Count  int64
-	}
 	var results []StatusCount
 	err := r.db.Model(&models.Order{}).
 		Select("status, count(*) as count").
@@ -127,4 +128,14 @@ func (r *OrderRepository) GetStatusCounts() (map[string]int64, error) {
 		counts[r.Status] = r.Count
 	}
 	return counts, nil
+}
+
+func (r *OrderRepository) GetCompletedTodayCount() (int64, error) {
+	var count int64
+	today := time.Now().Format("2006-01-02")
+	err := r.db.Model(&models.Order{}).
+		Where("status = ?", "sudah_diambil").
+		Where("updated_at::date = ?", today).
+		Count(&count).Error
+	return count, err
 }

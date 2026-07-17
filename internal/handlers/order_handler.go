@@ -51,18 +51,31 @@ func (h *OrderHandler) Index(c fiber.Ctx) error {
 
 	statuses := h.orderService.GetStatusList()
 	counts, _ := h.orderService.GetStatusCounts()
+	completedToday, _ := h.orderService.GetCompletedTodayCount()
+
+	// Compute processing count (dicuci + dikeringkan + disetrika)
+	processingCount := counts["dicuci"] + counts["dikeringkan"] + counts["disetrika"]
+
+	// Pre-compute valid next statuses for each order (for quick action dropdown)
+	orderValidNext := make(map[uint][]string)
+	for _, o := range orders {
+		orderValidNext[o.ID] = h.orderService.GetValidNextStatuses(o.Status)
+	}
 
 	return render(c, "orders/index", fiber.Map{
-		"title":      "Pesanan",
-		"orders":     orders,
-		"status":     status,
-		"search":     search,
-		"page":       page,
-		"limit":      limit,
-		"total":      total,
-		"totalPages": totalPages,
-		"statuses":   statuses,
-		"counts":     counts,
+		"title":          "Pesanan",
+		"orders":         orders,
+		"status":         status,
+		"search":         search,
+		"page":           page,
+		"limit":          limit,
+		"total":          total,
+		"totalPages":     totalPages,
+		"statuses":       statuses,
+		"counts":         counts,
+		"completedToday": completedToday,
+		"processingCount": processingCount,
+		"orderValidNext":  orderValidNext,
 	}, "layouts/main")
 }
 
@@ -156,6 +169,33 @@ func (h *OrderHandler) UpdateStatus(c fiber.Ctx) error {
 	}
 
 	return c.Redirect().To("/orders/" + c.Params("id"))
+}
+
+func (h *OrderHandler) QuickStatus(c fiber.Ctx) error {
+	id, _ := strconv.ParseUint(c.Params("id"), 10, 32)
+	userID := helpers.LogAndGetUserID(c)
+
+	var req struct {
+		Status string `json:"status"`
+	}
+	if err := c.Bind().JSON(&req); err != nil {
+		return helpers.JSONError(c, fiber.StatusBadRequest, "Format request tidak valid")
+	}
+	if req.Status == "" {
+		return helpers.JSONError(c, fiber.StatusBadRequest, "Status harus diisi")
+	}
+
+	if err := h.orderService.QuickUpdateStatus(uint(id), req.Status, userID); err != nil {
+		return helpers.JSONError(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	// Get updated order for fresh status
+	order, _ := h.orderService.GetByID(uint(id))
+	return helpers.JSONSuccess(c, fiber.Map{
+		"success": true,
+		"status":  order.Status,
+		"message": "Status berhasil diperbarui",
+	})
 }
 
 func (h *OrderHandler) Delete(c fiber.Ctx) error {

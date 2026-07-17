@@ -114,6 +114,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	orders.Post("/", orderHandler.Create)
 	orders.Get("/:id", orderHandler.Show)
 	orders.Post("/:id/status", orderHandler.UpdateStatus)
+	orders.Post("/:id/quick-status", orderHandler.QuickStatus)
 	orders.Get("/:id/print", orderHandler.Print)
 	orders.Post("/:id/pay", orderHandler.Pay)
 	orders.Post("/:id/delete", orderHandler.Delete)
@@ -194,6 +195,36 @@ func TemplateFunctions() template.FuncMap {
 		},
 		"nowDate": func() string {
 			return time.Now().Format("2006-01-02")
+		},
+		"timeAgo":    services.TimeAgo,
+		"statusIcon": services.StatusIcon,
+		"statusLabel": services.StatusLabel,
+		"default": func(d, v interface{}) interface{} {
+			switch v := v.(type) {
+			case int64:
+				if v == 0 {
+					return d
+				}
+				return v
+			case string:
+				if v == "" {
+					return d
+				}
+				return v
+			default:
+				return v
+			}
+		},
+		"len": func(v interface{}) int {
+			switch v := v.(type) {
+			case []string:
+				return len(v)
+			default:
+				return 0
+			}
+		},
+		"gt": func(a, b int) bool {
+			return a > b
 		},
 	}
 }

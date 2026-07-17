@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/afdhalpower/golanglaundry/internal/repositories"
@@ -130,4 +131,74 @@ func (s *DashboardService) GetStats() (*DashboardStats, error) {
 		TotalCustomers:         totalCustomers,
 		TotalExpensesThisMonth: expensesMonth,
 	}, nil
+}
+
+// GetRecentTracking returns recent tracking activity with customer names.
+func (s *DashboardService) GetRecentTracking(limit int) ([]repositories.RecentTrackingItem, error) {
+	return s.dashboardRepo.GetRecentTracking(limit)
+}
+
+// CountOverdueOrders returns how many orders are past their estimated done date.
+func (s *DashboardService) CountOverdueOrders() (int64, error) {
+	return s.dashboardRepo.CountOverdueOrders()
+}
+
+// GetOverdueOrders returns the list of overdue orders.
+func (s *DashboardService) GetOverdueOrders() ([]repositories.OverdueOrderItem, error) {
+	return s.dashboardRepo.GetOverdueOrders()
+}
+
+// TimeAgo converts a time to a human-readable relative time string in Indonesian.
+func TimeAgo(t time.Time) string {
+	d := time.Since(t)
+	switch {
+	case d < time.Minute:
+		return "baru saja"
+	case d < 2*time.Minute:
+		return "1 menit lalu"
+	case d < time.Hour:
+		return fmt.Sprintf("%d menit lalu", int(d.Minutes()))
+	case d < 2*time.Hour:
+		return "1 jam lalu"
+	case d < 24*time.Hour:
+		return fmt.Sprintf("%d jam lalu", int(d.Hours()))
+	case d < 48*time.Hour:
+		return "kemarin"
+	default:
+		return fmt.Sprintf("%d hari lalu", int(d.Hours()/24))
+	}
+}
+
+// StatusIcon returns an emoji icon based on the order status.
+func StatusIcon(status string) string {
+	icons := map[string]string{
+		"menunggu":      "🕐",
+		"dicuci":        "🫧",
+		"dikeringkan":   "💨",
+		"disetrika":     "🔥",
+		"siap_diambil":  "✅",
+		"sudah_diambil": "📦",
+		"dibatalkan":    "❌",
+	}
+	if icon, ok := icons[status]; ok {
+		return icon
+	}
+	return "📋"
+}
+
+// StatusLabel returns a human-readable Indonesian status label.
+func StatusLabel(status string) string {
+	labels := map[string]string{
+		"menunggu":      "Menunggu",
+		"dicuci":        "Dicuci",
+		"dikeringkan":   "Dikeringkan",
+		"disetrika":     "Disetrika",
+		"siap_diambil":  "Siap Diambil",
+		"sudah_diambil": "Sudah Diambil",
+		"dibatalkan":    "Dibatalkan",
+	}
+	if label, ok := labels[status]; ok {
+		return label
+	}
+	return status
 }
